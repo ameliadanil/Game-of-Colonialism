@@ -8,46 +8,46 @@ import java.util.Random;
 
 public class GameOfColonies extends JPanel implements ActionListener {
 
-    private static final int WIDTH = 1200; // Window width
-    private static final int HEIGHT = 800; // Window height
-    private static final int CELL_SIZE = 4; // Size of each cell
-    private static final int COLS = WIDTH / CELL_SIZE; // Number of columns
-    private static final int ROWS = HEIGHT / CELL_SIZE; // Number of rows
-    private static final int INITIAL_COLONIES = 10; // Number of initial colonies
-    private static final int GENERATION_INTERVAL = 200; // Time between generations (ms)
+    private static final int WIDTH = 1200;
+    private static final int HEIGHT = 800;
+    private static final int CELL_SIZE = 4;
+    private static final int COLS = WIDTH / CELL_SIZE;
+    private static final int ROWS = HEIGHT / CELL_SIZE;
+    private static final int INITIAL_COLONIES = 10;
+    private static final int GENERATION_INTERVAL = 200;
 
-    private int[][] grid = new int[COLS][ROWS]; // Grid for cell states
-    private Color[][] colors = new Color[COLS][ROWS]; // Color array for each cell
-    private Random random = new Random(); // Random generator for initial colonies
-    private javax.swing.Timer timer; // Timer to handle periodic updates
-    private int generations = 0; // Generation counter
-    private int livingCells = 0; // Counter for total living cells
+    private int[][] grid = new int[COLS][ROWS];
+    private Color[][] colors = new Color[COLS][ROWS];
+    private Random random = new Random();
+    private javax.swing.Timer timer;
+    private int generations = 0;
+    private int livingCells = 0;
 
     private JButton exitButton;
-	private JButton resetButton;
-
+    private JButton resetButton;
 
     public GameOfColonies() {
-        setPreferredSize(new Dimension(WIDTH, HEIGHT)); // Set size of the panel
-        setBackground(Color.WHITE); // Set background color
-        initializeColonies(); // Initialize the first colonies
-        timer = new javax.swing.Timer(GENERATION_INTERVAL, this); // Set timer for periodic updates
-        timer.start(); // Start the timer
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        setBackground(Color.WHITE);
+        initializeColonies();
+        timer = new javax.swing.Timer(GENERATION_INTERVAL, this);
+        timer.start();
 
-        exitButton = new JButton("Exit");
+        exitButton = new JButton("Wyjdź");
         exitButton.addActionListener(e -> System.exit(0));
         setLayout(new BorderLayout());
         add(exitButton, BorderLayout.SOUTH);
-		
-		resetButton = new JButton("Reset");
+
+        resetButton = new JButton("Reset");
         resetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 resetGame();
             }
         });
-        add(resetButton, BorderLayout.SOUTH);   
+        add(resetButton, BorderLayout.SOUTH);
 
+        initializeCatastrophesForked(); // Uruchomienie losowych katastrof
     }
 
     private void resetGame() {
@@ -63,21 +63,18 @@ public class GameOfColonies extends JPanel implements ActionListener {
         repaint();
     }
 
-    }
-
     private void initializeColonies() {
         for (int i = 0; i < INITIAL_COLONIES; i++) {
-            int x = random.nextInt(COLS); // Random x-coordinate
-            int y = random.nextInt(ROWS); // Random y-coordinate
-            Color color = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256)); // Random color
-            grid[x][y] = 1; // Mark cell as alive
-            colors[x][y] = color; // Assign random color to the living cell
-            // Initialize neighboring cells with the same color
+            int x = random.nextInt(COLS);
+            int y = random.nextInt(ROWS);
+            Color color = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+            grid[x][y] = 1;
+            colors[x][y] = color;
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
                     int newX = (x + dx + COLS) % COLS;
                     int newY = (y + dy + ROWS) % ROWS;
-                    if (grid[newX][newY] == 0 && random.nextInt(2) == 0) { // Randomly initialize neighboring cells
+                    if (grid[newX][newY] == 0 && random.nextInt(2) == 0) { // Losowa inicjalizacja sąsiadów
                         grid[newX][newY] = 1;
                         colors[newX][newY] = color;
                     }
@@ -88,23 +85,21 @@ public class GameOfColonies extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        updateColonies(); // Update the state of the grid based on Game of Life rules
-        repaint(); // Repaint the grid to reflect the new state
-        generations++; // Increment generation counter
+        updateColonies();
+        repaint();
+        generations++;
     }
 
     private void updateColonies() {
-        int[][] newGrid = new int[COLS][ROWS]; // Create new grid for next generation
-        Color[][] newColors = new Color[COLS][ROWS]; // New color array for next generation
-        livingCells = 0; // Reset the living cells counter for this generation
+        int[][] newGrid = new int[COLS][ROWS];
+        Color[][] newColors = new Color[COLS][ROWS];
+        livingCells = 0;
 
-        // Traverse every cell in the grid
         for (int x = 0; x < COLS; x++) {
             for (int y = 0; y < ROWS; y++) {
-                int aliveNeighbors = countAliveNeighbors(x, y); // Count alive neighbors
+                int aliveNeighbors = countAliveNeighbors(x, y);
 
-                // Game of Life rules
-                if (grid[x][y] == 1) { // If cell is alive
+                if (grid[x][y] == 1) { 
                     if (aliveNeighbors < 2 || aliveNeighbors > 3) {
                         newGrid[x][y] = 0;
                         newColors[x][y] = null;
@@ -113,7 +108,7 @@ public class GameOfColonies extends JPanel implements ActionListener {
                         newColors[x][y] = colors[x][y];
                         livingCells++;
                     }
-                } else { // If cell is dead (potential for growth)
+                } else { 
                     if (aliveNeighbors == 2) {
                         newGrid[x][y] = 1;
                         newColors[x][y] = getDominantNeighborColor(x, y);
@@ -132,8 +127,8 @@ public class GameOfColonies extends JPanel implements ActionListener {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 if (dx != 0 || dy != 0) {
-                    int newX = (x + dx + COLS) % COLS; // Wrap around horizontally
-                    int newY = (y + dy + ROWS) % ROWS; // Wrap around vertically
+                    int newX = (x + dx + COLS) % COLS;
+                    int newY = (y + dy + ROWS) % ROWS;
                     if (grid[newX][newY] == 1) {
                         count++;
                     }
@@ -160,9 +155,42 @@ public class GameOfColonies extends JPanel implements ActionListener {
         }
 
         return colorCount.entrySet().stream()
-            .max(Map.Entry.comparingByValue())
-            .map(Map.Entry::getKey)
-            .orElse(Color.WHITE);
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(Color.WHITE);
+    }
+
+    // Inicjalizacja wątku katastrof
+    private void initializeCatastrophesForked() {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep((random.nextInt(10) + 5) * 1000); // Losowy czas (5-15 sekund)
+                    causeCatastrophe(); // Wywołanie katastrofy
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    // Wywołanie katastrofy na losowym obszarze
+    private void causeCatastrophe() {
+        int centerX = random.nextInt(COLS); // Losowe współrzędne środka katastrofy
+        int centerY = random.nextInt(ROWS);
+        int radius = random.nextInt(20) + 10; // Losowy promień (10-30 komórek)
+
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                int newX = (centerX + x + COLS) % COLS; 
+                int newY = (centerY + y + ROWS) % ROWS; 
+                if (x * x + y * y <= radius * radius) { 
+                    grid[newX][newY] = 0;
+                    colors[newX][newY] = null;
+                }
+            }
+        }
+        repaint(); // Odśwież ekran po katastrofie
     }
 
     @Override
@@ -180,7 +208,6 @@ public class GameOfColonies extends JPanel implements ActionListener {
             }
         }
 
-        // Draw grid lines
         g.setColor(Color.WHITE);
         for (int x = 1; x < COLS; x++) {
             g.drawLine(x * CELL_SIZE, 0, x * CELL_SIZE, HEIGHT);
@@ -189,11 +216,10 @@ public class GameOfColonies extends JPanel implements ActionListener {
             g.drawLine(0, y * CELL_SIZE, WIDTH, y * CELL_SIZE);
         }
 
-        // Draw generation count and living cells count below the exit button
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 12));
-        g.drawString("Generation: " + generations, 10, exitButton.getY() - 15);
-        g.drawString("Living Cells: " + livingCells, 10, exitButton.getY() - 5);
+        g.drawString("Generacja: " + generations, 10, exitButton.getY() - 15);
+        g.drawString("Żywe komórki: " + livingCells, 10, exitButton.getY() - 5);
     }
 
     public static void main(String[] args) {
